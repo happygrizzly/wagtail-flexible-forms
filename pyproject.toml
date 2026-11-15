@@ -33,7 +33,7 @@ readme = "README.md"
 requires-python = ">=3.9"
 
 [project.urls]
-Source = "https://github.com/coderedcorp/wagtail-flexible-forms"
+Source = "https://github.com/happygrizzly/wagtail-flexible-forms"
 
 [tool.setuptools]
 packages = ["wagtail_flexible_forms"]
