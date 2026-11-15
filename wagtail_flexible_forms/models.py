@@ -27,7 +27,6 @@ from wagtail.contrib.forms.models import AbstractEmailForm
 from wagtail.contrib.forms.models import AbstractForm
 from wagtail.contrib.forms.models import AbstractFormSubmission
 from wagtail.contrib.forms.models import FormSubmission
-from wagtail.contrib.forms.views import SubmissionsListView
 
 from .blocks import FormFieldBlock
 from .blocks import FormStepBlock
@@ -198,8 +197,7 @@ class Steps(list):
         super().__init__(steps)
 
     def clamp_index(self, index: int):
-        if index < 0:
-            index = 0
+        index = max(index, 0)
         if index >= len(self):
             index = len(self) - 1
         while not self[index].is_available:
@@ -601,23 +599,19 @@ class AbstractSubmissionRevision(models.Model):
 
             if value2 and not value1:
                 diff.append(
-                    (
-                        (_("“%s” set.") % label)
-                        if is_hidden
-                        else (_("“%s” set to “%s”.")) % (label, value2)
-                    )
+                    (_("“%s” set.") % label)
+                    if is_hidden
+                    else (_("“%s” set to “%s”.")) % (label, value2)
                 )
             elif value1 and not value2:
                 diff.append(_("“%s” unset.") % label)
             else:
                 diff.append(
-                    (
-                        (_("“%s” changed.") % label)
-                        if is_hidden
-                        else (
-                            _("“%s” changed from “%s” to “%s”.")
-                            % (label, value1, value2)
-                        )
+                    (_("“%s” changed.") % label)
+                    if is_hidden
+                    else (
+                        _("“%s” changed from “%s” to “%s”.")
+                        % (label, value1, value2)
                     )
                 )
         return "\n".join(diff)
@@ -690,8 +684,6 @@ class StreamFormMixin:
     not directly compatible with it. Ideally, this (and/or FormMixin) could be
     refactored into a single compatible API.
     """
-
-    submissions_list_view_class = SubmissionsListView
 
     preview_modes = [
         ("form", _("Form")),
@@ -863,7 +855,9 @@ class StreamFormMixin:
             return super().serve_preview(request, mode_name)
 
     def get_submissions_list_view_class(self):
-        return self.submissions_list_view_class
+        from wagtail.contrib.forms.views import SubmissionsListView
+
+        return SubmissionsListView
 
     def serve_submissions_list_view(self, request, *args, **kwargs):
         """
